@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  music-service :
+    build: ./
+    container_name: music-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  db:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=12345
+    ports:
+      - 5432:5432
