@@ -1,0 +1,221 @@
+basePath: /
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.Song:
+    properties:
+      group:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      releaseDate:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a service to manage songs in a library.
+  title: Music Service API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      description: Retrieves a paginated list of songs with optional filtering based
+        on group, song name, release date, text, and link
+      parameters:
+      - description: Group name for filtering
+        in: query
+        name: groupName
+        type: string
+      - description: Song name for filtering
+        in: query
+        name: song
+        type: string
+      - description: Release date for filtering
+        in: query
+        name: releaseDate
+        type: string
+      - description: Text for filtering
+        in: query
+        name: text
+        type: string
+      - description: Link for filtering
+        in: query
+        name: link
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of songs per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: Songs retrieved successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid page or limit number
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to connect to database or retrieve songs
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get songs list with filtering and pagination
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: Adds a new song with details like group, song name, release date,
+        text, and link
+      parameters:
+      - description: Song details
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Song created successfully
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Invalid input data
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to call external API or insert data into database
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Add a new song to the library
+      tags:
+      - songs
+  /songs/{id}:
+    delete:
+      description: Deletes a song from the database by its ID
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Song deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to delete song or connect to database
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a song by ID
+      tags:
+      - songs
+    put:
+      consumes:
+      - application/json
+      description: Updates the song information by its ID. Only provided fields will
+        be updated.
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Song updated successfully
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Invalid JSON data
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to connect to database or update song
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update song details
+      tags:
+      - songs
+  /songs/{id}/text:
+    get:
+      description: Retrieves the song's text, paginated by verses, based on the song's
+        ID
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 2
+        description: Number of verses per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: Song text retrieved successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid page or limit number
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Song not found or no verses on this page
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to connect to database or retrieve song text
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get song text by verses with pagination
+      tags:
+      - songs
+swagger: "2.0"

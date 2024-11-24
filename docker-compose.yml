@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  music-service :
+    build: ./
+    container_name: music-service
+    ports:
+      - "8080:8080"
+    networks:
+      - music-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=12345
+    ports:
+      - 5432:5432
+    networks:
+      - music-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  music-api:
+    build: ./music-api 
+    container_name: music-api
+    ports:
+      - "8081:8080"
+    networks:
+      - music-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  music-network:
